@@ -3,8 +3,8 @@ package dev.jonathandlab.com.Coyn.server.service.device;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserDevice;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserEntity;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserDeviceEntity;
 import dev.jonathandlab.com.Coyn.server.repository.AppUserDeviceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,24 +30,24 @@ public class DeviceService implements IDeviceService {
     private AppUserDeviceRepository appUserDeviceRepository;
 
     @Override
-    public void verifyDevice(AppUser user) {
+    public void verifyDevice(AppUserEntity user) {
         try {
             String ip = extractIp();
             String location = getIpLocation(ip);
             String deviceDetails = getDeviceDetails(request.getHeader("user-agent"));
 
-            Optional<AppUserDevice> optionalAppUserDevice = findExistingDevice(user, deviceDetails, location);
+            Optional<AppUserDeviceEntity> optionalAppUserDevice = findExistingDevice(user, deviceDetails, location);
 
             if (optionalAppUserDevice.isEmpty()) {
                 // TODO: Unknown Device Notification
             } else {
-                AppUserDevice appUserDevice = AppUserDevice.builder()
+                AppUserDeviceEntity appUserDeviceEntity = AppUserDeviceEntity.builder()
                         .appUser(user)
                         .deviceDetails(deviceDetails)
                         .location(location)
                         .lastLoggedIn(new Date())
                         .build();
-                appUserDeviceRepository.save(appUserDevice);
+                appUserDeviceRepository.save(appUserDeviceEntity);
             }
         } catch (IOException e) {
             // TODO: Log Device Confirmation Error
@@ -56,28 +56,28 @@ public class DeviceService implements IDeviceService {
     }
 
     @Override
-    public void createDevice(AppUser user) {
+    public void createDevice(AppUserEntity user) {
         try {
             String ip = extractIp();
             String location = getIpLocation(ip);
             String deviceDetails = getDeviceDetails(request.getHeader("user-agent"));
 
-            AppUserDevice appUserDevice = AppUserDevice.builder()
+            AppUserDeviceEntity appUserDeviceEntity = AppUserDeviceEntity.builder()
                     .appUser(user)
                     .deviceDetails(deviceDetails)
                     .location(location)
                     .lastLoggedIn(new Date())
                     .build();
-            appUserDeviceRepository.save(appUserDevice);
+            appUserDeviceRepository.save(appUserDeviceEntity);
         } catch (IOException e) {
             // TODO: Log Device Confirmation Error
             e.printStackTrace();
         }
     }
 
-    private Optional<AppUserDevice> findExistingDevice(AppUser user, String deviceDetails, String location) {
-        Set<AppUserDevice> knownDevices = user.getAppUserDevices();
-        for (AppUserDevice existingDevice : knownDevices) {
+    private Optional<AppUserDeviceEntity> findExistingDevice(AppUserEntity user, String deviceDetails, String location) {
+        Set<AppUserDeviceEntity> knownDevices = user.getAppUserDevices();
+        for (AppUserDeviceEntity existingDevice : knownDevices) {
             if (existingDevice.getDeviceDetails().equals(deviceDetails) &&
             existingDevice.getLocation().equals(location)) {
                 return Optional.of(existingDevice);

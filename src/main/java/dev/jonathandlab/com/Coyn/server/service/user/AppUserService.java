@@ -1,14 +1,12 @@
 package dev.jonathandlab.com.Coyn.server.service.user;
 
 import dev.jonathandlab.com.Coyn.server.exception.CoynAppException;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserRole;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserEntity;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserRoleEntity;
 import dev.jonathandlab.com.Coyn.server.model.request.user.CreateAppUserRequest;
 import dev.jonathandlab.com.Coyn.server.repository.AppUserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,7 +28,7 @@ public class AppUserService implements IAppUserService, UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public AppUser createAppUser(CreateAppUserRequest createAppUserRequest) {
+    public AppUserEntity createAppUser(CreateAppUserRequest createAppUserRequest) {
         String email = createAppUserRequest.getEmail();
         if (appUserRepository.existsAppUserByEmail(email)) {
             String errorMessage = createAppUserRequest.getEmail() + " already in exist in database";
@@ -38,27 +36,27 @@ public class AppUserService implements IAppUserService, UserDetailsService {
         } else {
             String rawPassword = createAppUserRequest.getRawPassword();
             String encryptedPassword = passwordEncoder.encode(rawPassword);
-            AppUserRole roleUser = new AppUserRole(null, "ROLE_USER");
-            AppUser unsavedAppUser = AppUser.builder()
+            AppUserRoleEntity roleUser = new AppUserRoleEntity(null, "ROLE_USER");
+            AppUserEntity unsavedAppUserEntity = AppUserEntity.builder()
                     .email(email)
                     .encryptedPassword(encryptedPassword)
                     .roles(new HashSet<>(List.of(roleUser)))
                     .build();
-            return appUserRepository.save(unsavedAppUser);
+            return appUserRepository.save(unsavedAppUserEntity);
         }
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUser appUser = appUserRepository.findAppUserByEmail(email)
+        AppUserEntity appUserEntity = appUserRepository.findAppUserByEmail(email)
                 .orElseThrow(() -> {
                     throw new UsernameNotFoundException(email + " not found in database");
                 });
-        return new User(appUser.getEmail(), appUser.getEncryptedPassword(), new ArrayList<>());
+        return new User(appUserEntity.getEmail(), appUserEntity.getEncryptedPassword(), new ArrayList<>());
     }
 
     @Override
-    public AppUser getCurrentAppUser() {
+    public AppUserEntity getCurrentAppUser() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return appUserRepository.findAppUserByEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException(username + " not found in database"));

@@ -1,6 +1,6 @@
 package dev.jonathandlab.com.Coyn.server.model.entity.user;
 
-import dev.jonathandlab.com.Coyn.server.model.entity.account.AccountEntity;
+import dev.jonathandlab.com.Coyn.server.model.entity.institution.InstitutionEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-public class AppUser {
+public class AppUserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,13 +24,13 @@ public class AppUser {
     private String encryptedPassword;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<AppUserDevice> appUserDevices = new HashSet<>();
+    private Set<AppUserDeviceEntity> appUserDevices = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<AccountEntity> accounts = new HashSet<>();
+    private Set<InstitutionEntity> institutions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<AppUserRole> roles = new HashSet<>();
+    private Set<AppUserRoleEntity> roles = new HashSet<>();
 
     @Override
     public String toString() {

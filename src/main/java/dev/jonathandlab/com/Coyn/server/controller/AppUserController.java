@@ -3,7 +3,7 @@ package dev.jonathandlab.com.Coyn.server.controller;
 import dev.jonathandlab.com.Coyn.server.model.response.token.ServerTokenResponse;
 import dev.jonathandlab.com.Coyn.server.service.device.IDeviceService;
 import dev.jonathandlab.com.Coyn.server.service.token.ITokenService;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserEntity;
 import dev.jonathandlab.com.Coyn.server.model.request.user.CreateAppUserRequest;
 import dev.jonathandlab.com.Coyn.server.service.user.IAppUserService;
 import lombok.AllArgsConstructor;
@@ -33,11 +33,11 @@ public class AppUserController {
      */
     @PostMapping("signup")
     public ResponseEntity<ServerTokenResponse> createAppUser(@RequestBody CreateAppUserRequest createAppUserRequest) {
-        AppUser createdAppUser = appUserService.createAppUser(createAppUserRequest);
-        List<SimpleGrantedAuthority> authorities = createdAppUser.getRoles().stream()
+        AppUserEntity createdAppUserEntity = appUserService.createAppUser(createAppUserRequest);
+        List<SimpleGrantedAuthority> authorities = createdAppUserEntity.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName())).toList();
-        ServerTokenResponse serverAccessToken = tokenService.createServerTokenResponse(createdAppUser.getEmail(), authorities);
-        deviceService.createDevice(createdAppUser);
+        ServerTokenResponse serverAccessToken = tokenService.createServerTokenResponse(createdAppUserEntity.getEmail(), authorities);
+        deviceService.createDevice(createdAppUserEntity);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(serverAccessToken);
     }

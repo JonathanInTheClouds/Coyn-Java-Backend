@@ -41,10 +41,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Stateless
         http.csrf().disable();
+        http.headers().frameOptions().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // Permitted Endpoints
-        http.authorizeRequests().antMatchers("*").permitAll();
+        http.authorizeRequests().antMatchers("/h2-console/*").permitAll();
 
         // Filters
         http.addFilter(customAuthenticationFilter);

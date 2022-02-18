@@ -12,13 +12,13 @@ import java.util.Date;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUserDevice {
+public class AppUserDeviceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
-    private AppUser appUser;
+    private AppUserEntity appUser;
 
     private String deviceDetails;
 

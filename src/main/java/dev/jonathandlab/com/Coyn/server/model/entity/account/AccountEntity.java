@@ -1,6 +1,6 @@
 package dev.jonathandlab.com.Coyn.server.model.entity.account;
 
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
+import dev.jonathandlab.com.Coyn.server.model.entity.institution.InstitutionEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,7 +19,7 @@ public class AccountEntity {
     private Long id;
 
     @ManyToOne
-    private AppUser appUser;
+    private InstitutionEntity institution;
 
     @OneToOne
     private AccountBalanceEntity balance;

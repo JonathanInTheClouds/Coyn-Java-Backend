@@ -1,41 +1,38 @@
-package dev.jonathandlab.com.Coyn.server.model.entity.token;
+package dev.jonathandlab.com.Coyn.server.model.entity.user;
 
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
-@Builder
-public class ServerRefreshToken {
+public class AppUserRoleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
-    private AppUser appUser;
-
-    private Timestamp expirationDate;
+    private String name;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        ServerRefreshToken that = (ServerRefreshToken) o;
+        AppUserRoleEntity that = (AppUserRoleEntity) o;
         return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, appUser);
+        return Objects.hash(id, name);
     }
 }

@@ -8,10 +8,10 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.plaid.client.model.*;
 import com.plaid.client.request.PlaidApi;
 import dev.jonathandlab.com.Coyn.server.exception.CoynAppException;
-import dev.jonathandlab.com.Coyn.server.model.entity.token.ServerRefreshToken;
+import dev.jonathandlab.com.Coyn.server.model.entity.token.ServerRefreshTokenEntity;
 import dev.jonathandlab.com.Coyn.server.model.request.token.PublicTokenExchangeRequest;
 import dev.jonathandlab.com.Coyn.server.model.response.token.ServerTokenResponse;
-import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUser;
+import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserEntity;
 import dev.jonathandlab.com.Coyn.server.repository.AppUserRepository;
 import dev.jonathandlab.com.Coyn.server.repository.ServerRefreshTokenRepository;
 import lombok.AllArgsConstructor;
@@ -133,16 +133,16 @@ public class TokenService implements ITokenService {
 
     private String createServerRefreshToken(String username) {
         Algorithm algorithm = Algorithm.HMAC256("Secret Password".getBytes());
-        AppUser appUser = appUserRepository.findAppUserByEmail(username)
+        AppUserEntity appUserEntity = appUserRepository.findAppUserByEmail(username)
                 .orElseThrow(() -> {
                     throw new UsernameNotFoundException("User not found in database");
                 });
         Date expirationDate = getDateFromNowInMinutes(15);
-        ServerRefreshToken serverRefreshToken = new ServerRefreshToken(null, appUser, Timestamp.from(expirationDate.toInstant()));
-        ServerRefreshToken savedServerRefreshToken = serverRefreshTokenRepository.save(serverRefreshToken);
+        ServerRefreshTokenEntity serverRefreshTokenEntity = new ServerRefreshTokenEntity(null, appUserEntity, Timestamp.from(expirationDate.toInstant()));
+        ServerRefreshTokenEntity savedServerRefreshTokenEntity = serverRefreshTokenRepository.save(serverRefreshTokenEntity);
         return JWT.create()
                 .withSubject(username)
-                .withClaim("id", savedServerRefreshToken.getId())
+                .withClaim("id", savedServerRefreshTokenEntity.getId())
                 .withExpiresAt(expirationDate)
                 .sign(algorithm);
     }

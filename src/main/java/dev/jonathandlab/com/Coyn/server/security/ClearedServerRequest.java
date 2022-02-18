@@ -16,7 +16,8 @@ public class ClearedServerRequest {
                 request.getServletPath().equals("/token/plaid/link"),
                 request.getServletPath().equals("/token/plaid/link/exchange"),
                 request.getServletPath().equals("/user/signup"),
-                request.getServletPath().equals("/user/signin")
+                request.getServletPath().equals("/user/signin"),
+                request.getServletPath().startsWith("/h2-console")
         );
         for (Boolean aBoolean : clearedRequest) {
             if (aBoolean) {
