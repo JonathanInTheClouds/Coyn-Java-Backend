@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = {"/institution"})
+@RequestMapping(value = {"/institution/"})
 public class AccountController {
 
     private IAccountService accountService;
@@ -27,6 +27,7 @@ public class AccountController {
 
     /**
      * Get AccountsResponse object using access token
+     * @param institutionId String institution identification
      * @param accessTokenRequest AccessTokenRequest class containing accessToken
      * @return AccountsResponse class wrapped in ResponseEntity
      */
@@ -44,6 +45,7 @@ public class AccountController {
 
     /**
      * Get AccountsResponse object using public token
+     * @param institutionId String institution identification
      * @param publicTokenExchangeRequest PublicTokenExchangeRequest class containing publicToken
      * @return AccountsResponse class wrapped in ResponseEntity
      */

@@ -3,6 +3,8 @@ package dev.jonathandlab.com.Coyn.server.controller;
 import com.plaid.client.model.ItemPublicTokenExchangeResponse;
 import com.plaid.client.model.LinkTokenCreateResponse;
 import dev.jonathandlab.com.Coyn.server.model.request.token.PublicTokenExchangeRequest;
+import dev.jonathandlab.com.Coyn.server.model.request.token.ServerTokenRefreshRequest;
+import dev.jonathandlab.com.Coyn.server.model.response.token.ServerTokenResponse;
 import dev.jonathandlab.com.Coyn.server.service.token.ITokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,10 @@ public class TokenController {
                 .body(publicToken);
     }
 
-
+    @PutMapping("/server/refresh")
+    public ResponseEntity<ServerTokenResponse> refreshServerToken(@RequestBody ServerTokenRefreshRequest serverTokenRefreshRequest) {
+        ServerTokenResponse serverTokenResponse = tokenService.refreshServerToken(serverTokenRefreshRequest);
+        return ResponseEntity.ok(serverTokenResponse);
+    }
 
 }

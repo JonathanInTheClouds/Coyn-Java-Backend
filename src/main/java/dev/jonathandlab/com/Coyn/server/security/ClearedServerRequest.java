@@ -15,6 +15,7 @@ public class ClearedServerRequest {
         List<Boolean> clearedRequest = List.of(
                 request.getServletPath().equals("/token/plaid/link"),
                 request.getServletPath().equals("/token/plaid/link/exchange"),
+                request.getServletPath().equals("/token/server/refresh"),
                 request.getServletPath().equals("/user/signup"),
                 request.getServletPath().equals("/user/signin"),
                 request.getServletPath().startsWith("/h2-console")

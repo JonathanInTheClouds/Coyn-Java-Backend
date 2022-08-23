@@ -32,8 +32,6 @@ public class AccountService implements IAccountService {
     private IAppUserService appUserService;
     private InstitutionRepository institutionRepository;
     private AppUserRepository appUserRepository;
-    private AccountRepository accountRepository;
-    private BalanceRepository balanceRepository;
     private PasswordEncoder passwordEncoder;
 
     @Override

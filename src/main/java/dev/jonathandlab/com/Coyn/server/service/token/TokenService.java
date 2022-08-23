@@ -10,6 +10,7 @@ import com.plaid.client.request.PlaidApi;
 import dev.jonathandlab.com.Coyn.server.exception.CoynAppException;
 import dev.jonathandlab.com.Coyn.server.model.entity.token.ServerRefreshTokenEntity;
 import dev.jonathandlab.com.Coyn.server.model.request.token.PublicTokenExchangeRequest;
+import dev.jonathandlab.com.Coyn.server.model.request.token.ServerTokenRefreshRequest;
 import dev.jonathandlab.com.Coyn.server.model.response.token.ServerTokenResponse;
 import dev.jonathandlab.com.Coyn.server.model.entity.user.AppUserEntity;
 import dev.jonathandlab.com.Coyn.server.repository.AppUserRepository;
@@ -21,11 +22,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class TokenService implements ITokenService {
 
@@ -81,8 +84,24 @@ public class TokenService implements ITokenService {
     }
 
     @Override
-    public void invalidatePlaidAccessToken(String accessToken) {
-        ItemAccessTokenInvalidateRequest itemAccessTokenInvalidateRequest = new ItemAccessTokenInvalidateRequest().accessToken(accessToken);
+    public HashMap<String, String> parsePlaidAccessTokens(String plaidAccessTokens) {
+        String[] idPlaidAccessTokenPairs = plaidAccessTokens.split(",");
+        HashMap<String, String> idPlaidAccessTokenPairHashMap = new HashMap<>();
+        for (String idPlaidAccessTokenPair : idPlaidAccessTokenPairs) {
+            String[] pair = idPlaidAccessTokenPair.split("=");
+            if (pair.length != 2) {
+                continue;
+            }
+            String id = pair[0];
+            String plaidAccessToken = pair[1];
+            idPlaidAccessTokenPairHashMap.put(id, plaidAccessToken);
+        }
+        return idPlaidAccessTokenPairHashMap;
+    }
+
+    @Override
+    public void invalidatePlaidAccessToken(String plaidAccessToken) {
+        ItemAccessTokenInvalidateRequest itemAccessTokenInvalidateRequest = new ItemAccessTokenInvalidateRequest().accessToken(plaidAccessToken);
         try {
             plaidApi.itemAccessTokenInvalidate(itemAccessTokenInvalidateRequest)
                     .execute();
@@ -121,12 +140,33 @@ public class TokenService implements ITokenService {
         }
     }
 
+    @Override
+    public ServerTokenResponse refreshServerToken(ServerTokenRefreshRequest serverTokenRefreshRequest) {
+        String refreshToken = serverTokenRefreshRequest.getRefreshToken();
+        DecodedJWT decodedJWT = JWT.decode(refreshToken);
+        Long id = decodedJWT.getClaim("id").asLong();
+        ServerRefreshTokenEntity serverRefreshTokenEntity = serverRefreshTokenRepository.findById(id)
+                .orElseThrow(() -> new CoynAppException(HttpStatus.NOT_FOUND, id + " not found in database"));
+        AppUserEntity appUser = serverRefreshTokenEntity.getAppUser();
+        List<SimpleGrantedAuthority> authorities = appUser.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName())).toList();
+        Date serverRefreshTokenExpirationDate = getDateFromNowInMinutes(5);
+        serverRefreshTokenEntity.setExpirationDate(Timestamp.from(serverRefreshTokenExpirationDate.toInstant()));
+        serverRefreshTokenRepository.save(serverRefreshTokenEntity);
+        String email = appUser.getEmail();
+        Algorithm algorithm = Algorithm.HMAC256("Secret Password".getBytes());
+        String newServerAccessToken = createServerAccessToken(email, authorities);
+        String newServerRefreshToken = JWT.create().withSubject(email).withClaim("id", id).withExpiresAt(serverRefreshTokenExpirationDate)
+                .sign(algorithm);
+        return ServerTokenResponse.builder().serverRefreshToken(newServerRefreshToken).serverAccessToken(newServerAccessToken).build();
+    }
+
     private String createServerAccessToken(String username, List<SimpleGrantedAuthority> authorities) {
         Algorithm algorithm = Algorithm.HMAC256("Secret Password".getBytes());
         List<String> authoritiesStringList = authorities.stream().map(SimpleGrantedAuthority::getAuthority).toList();
         return JWT.create()
                 .withSubject(username)
-                .withExpiresAt(getDateFromNowInMinutes(10))
+                .withExpiresAt(getDateFromNowInMinutes(3))
                 .withClaim("roles", authoritiesStringList)
                 .sign(algorithm);
     }
@@ -137,7 +177,7 @@ public class TokenService implements ITokenService {
                 .orElseThrow(() -> {
                     throw new UsernameNotFoundException("User not found in database");
                 });
-        Date expirationDate = getDateFromNowInMinutes(15);
+        Date expirationDate = getDateFromNowInMinutes(5);
         ServerRefreshTokenEntity serverRefreshTokenEntity = new ServerRefreshTokenEntity(null, appUserEntity, Timestamp.from(expirationDate.toInstant()));
         ServerRefreshTokenEntity savedServerRefreshTokenEntity = serverRefreshTokenRepository.save(serverRefreshTokenEntity);
         return JWT.create()

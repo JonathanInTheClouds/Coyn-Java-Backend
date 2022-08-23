@@ -60,12 +60,5 @@ public class AppUserService implements IAppUserService, UserDetailsService {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return appUserRepository.findAppUserByEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException(username + " not found in database"));
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-//            String currentUserName = authentication.getName();
-//            return appUserRepository.findAppUserByEmail(currentUserName)
-//                    .orElseThrow(() -> new UsernameNotFoundException(currentUserName + " not found in database"));
-//        }
-//        throw new UsernameNotFoundException("User not found in database");
     }
 }
