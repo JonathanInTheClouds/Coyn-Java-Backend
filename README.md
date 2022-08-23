@@ -15,4 +15,4 @@ Coyn is an open source application designed to give you an overview of your fina
 * Once the data has been secured it is fed into open source algorithms for reporting to the user.
 
 ### What Technologies are used?
-* Plaid uses `Java`, `Spring`, and `SQL` for databasing.
+* Coyn uses `Java`, `Spring`, and your choice of `SQL` database.
