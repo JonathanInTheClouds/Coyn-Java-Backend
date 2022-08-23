@@ -1,7 +1,7 @@
 # Coyn 🪙
 
 ### What is Coyn?
-Coyn is an open source application designed to give you an overview of your finances. Which in turns leads to you saving Money (Coyns).
+Coyn is an open source application designed to give you an overview of your finances. Which in turn leads to you saving Money (Coyns).
 
 ### Goals of Coyn!
 * Identifying reoccurring charges.
